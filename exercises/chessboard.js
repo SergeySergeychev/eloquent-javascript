@@ -1,16 +1,23 @@
 // page 38
-const boardSize = 8;
+const boardSize = 4;
 let lineNumber = 1;
 let chessBoard = "";
 
 function drawLine() {
   let line = "";
-  const isLineOdd = lineNumber % 2 !== 0 ? true : false;
+  const isLineYOdd = lineNumber % 2 !== 0 ? true : false;
 
-  for (let blackField = "#", whiteField = " "; boardSize > line.length; ) {
-    isLineOdd
-      ? (line += whiteField + blackField)
-      : (line += blackField + whiteField);
+  for (
+    let blackField = "#", whiteField = " ", lineX = 1;
+    boardSize > line.length;
+    lineX++
+  ) {
+    const isLineXOdd = lineX % 2 !== 0 ? true : false;
+    if (isLineYOdd) {
+      isLineXOdd ? (line += whiteField) : (line += blackField);
+    } else {
+      isLineXOdd ? (line += blackField) : (line += whiteField);
+    }
   }
   return line + "\n";
 }
