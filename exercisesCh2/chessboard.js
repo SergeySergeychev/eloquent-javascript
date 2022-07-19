@@ -1,12 +1,11 @@
 // page 38
-const boardSize = 4;
+const boardSize = 9;
 let lineNumber = 1;
 let chessBoard = "";
 
 function drawLine() {
   let line = "";
   const isLineYOdd = lineNumber % 2 !== 0 ? true : false;
-
   for (
     let blackField = "#", whiteField = " ", lineX = 1;
     boardSize > line.length;
