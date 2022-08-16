@@ -1,0 +1,6 @@
+let singleQuotes = /'(\w+'?\w+.*?)'/g;
+let str = "'I'm the cook,' he said, 'it's my job.'";
+let solution = str.replace(singleQuotes, '"$1"');
+
+// solution by Marijn Haverbek
+console.log(str.replace(/(^|\W)'|'(\W|$)/g, '$1"$2'));
