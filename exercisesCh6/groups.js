@@ -98,9 +98,9 @@ class GroupByMH {
     }
     return group;
   }
-  [Symbol.iterator]() {
-    return new GroupIteratorByMH(this);
-  }
+  // [Symbol.iterator]() {
+  //   return new GroupIteratorByMH(this);
+  // }
 }
 
 class GroupIteratorByMH {
@@ -120,8 +120,12 @@ class GroupIteratorByMH {
   }
 }
 
+GroupByMH.prototype[Symbol.iterator] = function* () {
+  for (let i = 0; i < this.members.length; i++) {
+    yield this.members[i];
+  }
+};
 let group = GroupByMH.from([10, 20, 30, 40, 50]);
 for (let value of group) {
   console.log(value);
 }
-group.has(10);
