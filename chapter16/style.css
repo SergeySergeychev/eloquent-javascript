@@ -1,0 +1,72 @@
+body {
+  /* display: flex; */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+  min-height: 100vh;
+  background: #0f2027; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    to right,
+    #0f2027,
+    #203a43,
+    #2c5364
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(
+    to right,
+    #0f2027,
+    #203a43,
+    #2c5364
+  ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+h1 {
+  font-size: 45px;
+  font-family: "Lucida Console", sans-serif;
+  color: antiquewhite;
+}
+
+/* STYLINGS FOR GAME */
+.game {
+  overflow: hidden;
+  max-width: 600px;
+  max-height: 450px;
+  position: relative;
+}
+.background {
+  background-color: rgb(52, 166, 251);
+  table-layout: fixed;
+  border-spacing: 0;
+}
+
+.background td {
+  padding: 0;
+}
+
+.lava {
+  background-color: rgb(255, 100, 100);
+}
+
+.wall {
+  background-color: white;
+}
+
+.actor {
+  position: absolute;
+}
+.coin {
+  background: rgb(241, 229, 89);
+}
+.player {
+  background: rgb(64, 64, 64);
+}
+.lost .player {
+  background: rgb(160, 64, 64);
+}
+.won .player {
+  box-shadow: -4px -7px 8px white, 4px -7px 8px white;
+}
+
+.monster {
+  background: purple;
+}
