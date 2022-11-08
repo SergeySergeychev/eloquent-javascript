@@ -1,0 +1,16 @@
+body {
+  margin: 100;
+  min-height: 100vh;
+  background: #0f2027;
+  background: -webkit-linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+}
+h1 {
+  font-size: 45px;
+  font-family: "Lucida Console", sans-serif;
+  color: antiquewhite;
+}
+
+canvas {
+  background: whitesmoke;
+}
