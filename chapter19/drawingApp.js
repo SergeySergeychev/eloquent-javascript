@@ -23,9 +23,6 @@ class Picture {
     return new Picture(this.width, this.height, copy);
   }
 }
-function updateState(state, action) {
-  return { ...state, ...action };
-}
 
 // DOM BUILDING
 function elt(type, props, ...children) {
@@ -54,19 +51,29 @@ class PictureCanvas {
   }
   syncState(picture) {
     if (this.picture === picture) return;
+    drawPicture(picture, this.dom, scale, this.picture);
     this.picture = picture;
-    drawPicture(this.picture, this.dom, scale);
   }
 }
 
-function drawPicture(picture, canvas, scale) {
-  canvas.width = picture.width * scale;
-  canvas.height = picture.height * scale;
+function drawPicture(picture, canvas, scale, prevPic) {
+  if (
+    prevPic == null ||
+    picture.width !== prevPic.width ||
+    picture.height !== prevPic.height
+  ) {
+    canvas.width = picture.width * scale;
+    canvas.height = picture.height * scale;
+  }
   let cx = canvas.getContext("2d");
   for (let y = 0; y < picture.height; y++) {
     for (let x = 0; x < picture.width; x++) {
-      cx.fillStyle = picture.pixel(x, y);
-      cx.fillRect(x * scale, y * scale, scale, scale);
+      let prevColor = prevPic?.pixel(x, y);
+      let color = picture.pixel(x, y);
+      if (color !== prevColor) {
+        cx.fillStyle = color;
+        cx.fillRect(x * scale, y * scale, scale, scale);
+      }
     }
   }
 }
@@ -127,6 +134,7 @@ class PixelEditor {
   constructor(state, config) {
     let { tools, controls, dispatch } = config;
     this.state = state;
+
     this.canvas = new PictureCanvas(state.picture, (pos) => {
       let tool = tools[this.state.tool];
       let onMove = tool(pos, this.state, dispatch);
@@ -136,11 +144,32 @@ class PixelEditor {
     this.controls = controls.map((Control) => new Control(state, config));
     this.dom = elt(
       "div",
-      {},
+      {
+        // tabIndex doesn't allow to switch tools and do focus on app.
+        tabIndex: 0,
+        // Event listener to keep track on pressed keys.
+        onkeydown: (event) => this.keyDown(event, config),
+      },
       this.canvas.dom,
       elt("br"),
       ...this.controls.reduce((a, c) => a.concat(" ", c.dom), [])
     );
+  }
+  // Method to add keybindings.
+  keyDown(event, { dispatch, tools }) {
+    // if pressed key comb. is Ctrl + z  => undo prev picture.
+    if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+      event.preventDefault();
+      dispatch({ undo: true });
+      // if pressed key is one of capital letters in tools name => select tool.
+    } else if (!event.ctrlKey && !event.shiftKey && !event.metaKey) {
+      for (let tool of Object.keys(tools)) {
+        if (tool[0] === event.key) {
+          event.preventDefault();
+          dispatch({ tool });
+        }
+      }
+    }
   }
   syncState(state) {
     this.state = state;
@@ -204,7 +233,6 @@ function draw(pos, state, dispatch) {
 
 function rectangle(start, state, dispatch) {
   function drawRectangle(pos) {
-    console.log(start, pos);
     let xStart = Math.min(start.x, pos.x);
     let yStart = Math.min(start.y, pos.y);
     let xEnd = Math.max(start.x, pos.x);
@@ -254,6 +282,35 @@ function fill({ x, y }, state, dispatch) {
   dispatch({ picture: state.picture.draw(drawn) });
 }
 
+function circle(pos, state, dispatch) {
+  function drawCircle(to) {
+    let radius = Math.sqrt(
+      Math.pow(to.x - pos.x, 2) + Math.pow(to.y - pos.y, 2)
+    );
+    let radiusC = Math.ceil(radius);
+    let drawn = [];
+    for (let dy = -radiusC; dy <= radiusC; dy++) {
+      for (let dx = -radiusC; dx <= radiusC; dx++) {
+        let dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        if (dist > radius) continue;
+        let y = pos.y + dy;
+        let x = pos.x + dx;
+        if (
+          y < 0 ||
+          y >= state.picture.height ||
+          x < 0 ||
+          x >= state.picture.width
+        ) {
+          continue;
+        }
+        drawn.push({ x, y, color: state.color });
+      }
+      dispatch({ picture: state.picture.draw(drawn) });
+    }
+  }
+  drawCircle(pos);
+  return drawCircle;
+}
 function pick(pos, state, dispatch) {
   dispatch({ color: state.picture.pixel(pos.x, pos.y) });
 }
@@ -346,6 +403,7 @@ class UndoButton {
 
 function historyUpdateState(state, action) {
   if (action.undo === true) {
+    console.log(state);
     if (state.done.length === 0) return state;
     return Object.assign({}, state, {
       picture: state.done[0],
@@ -396,5 +454,6 @@ function startPixelEditor({
   });
   return app.dom;
 }
-
-document.querySelector("div").appendChild(startPixelEditor({}));
+// Adding drawing circle tool to editor.
+let dom = startPixelEditor({ tools: Object.assign({}, baseTools, { circle }) });
+document.querySelector("div").appendChild(dom);
